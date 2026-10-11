@@ -293,26 +293,29 @@ if not st.session_state["authenticated"]:
                     if not login_id.strip() or not login_pw.strip():
                         st.error("Please enter both credentials.")
                     else:
-                        try:
-                            res = requests.post(
-                                f"{BACKEND_URL}/auth/login",
-                                json={"username_or_email": login_id, "password": login_pw},
-                                timeout=10
-                            )
-                            if res.status_code == 200:
-                                data = res.json()
-                                st.session_state["authenticated"] = True
-                                st.session_state["auth_token"] = data["token"]
-                                st.session_state["user"] = data["user"]
-                                st.rerun()
-                            else:
-                                try:
-                                    err_msg = res.json().get("detail", "Invalid login credentials.")
-                                except Exception:
-                                    err_msg = f"Backend returned HTTP {res.status_code}: {res.text}"
-                                st.error(err_msg)
-                        except Exception as e:
-                            st.error(f"Cannot connect to backend: {e}")
+                        with st.spinner("Connecting to QueryPilot backend (waking up server if idle)..."):
+                            try:
+                                res = requests.post(
+                                    f"{BACKEND_URL}/auth/login",
+                                    json={"username_or_email": login_id, "password": login_pw},
+                                    timeout=60
+                                )
+                                if res.status_code == 200:
+                                    data = res.json()
+                                    st.session_state["authenticated"] = True
+                                    st.session_state["auth_token"] = data["token"]
+                                    st.session_state["user"] = data["user"]
+                                    st.rerun()
+                                else:
+                                    try:
+                                        err_msg = res.json().get("detail", "Invalid login credentials.")
+                                    except Exception:
+                                        err_msg = f"Backend returned HTTP {res.status_code}: {res.text}"
+                                    st.error(err_msg)
+                            except requests.exceptions.Timeout:
+                                st.warning("The backend was asleep on Render and is currently waking up (~30-45s cold start). It is ready now — please click Sign In again!")
+                            except Exception as e:
+                                st.error(f"Cannot connect to backend: {e}")
 
         with tab_signup:
             st.markdown("<br>", unsafe_allow_html=True)
@@ -332,31 +335,34 @@ if not st.session_state["authenticated"]:
                     elif len(reg_pw) < 6:
                         st.error("Password must be at least 6 characters.")
                     else:
-                        try:
-                            res = requests.post(
-                                f"{BACKEND_URL}/auth/register",
-                                json={
-                                    "username": reg_username,
-                                    "email": reg_email,
-                                    "password": reg_pw,
-                                    "full_name": full_name
-                                },
-                                timeout=10
-                            )
-                            if res.status_code == 200:
-                                data = res.json()
-                                st.session_state["authenticated"] = True
-                                st.session_state["auth_token"] = data["token"]
-                                st.session_state["user"] = data["user"]
-                                st.rerun()
-                            else:
-                                try:
-                                    err_msg = res.json().get("detail", "Registration failed.")
-                                except Exception:
-                                    err_msg = f"Backend returned HTTP {res.status_code}: {res.text}"
-                                st.error(err_msg)
-                        except Exception as e:
-                            st.error(f"Cannot connect to backend: {e}")
+                        with st.spinner("Creating account and connecting to engine..."):
+                            try:
+                                res = requests.post(
+                                    f"{BACKEND_URL}/auth/register",
+                                    json={
+                                        "username": reg_username,
+                                        "email": reg_email,
+                                        "password": reg_pw,
+                                        "full_name": full_name
+                                    },
+                                    timeout=60
+                                )
+                                if res.status_code == 200:
+                                    data = res.json()
+                                    st.session_state["authenticated"] = True
+                                    st.session_state["auth_token"] = data["token"]
+                                    st.session_state["user"] = data["user"]
+                                    st.rerun()
+                                else:
+                                    try:
+                                        err_msg = res.json().get("detail", "Registration failed.")
+                                    except Exception:
+                                        err_msg = f"Backend returned HTTP {res.status_code}: {res.text}"
+                                    st.error(err_msg)
+                            except requests.exceptions.Timeout:
+                                st.warning("The backend was asleep on Render and is currently waking up (~30-45s cold start). It is ready now — please click Register again!")
+                            except Exception as e:
+                                st.error(f"Cannot connect to backend: {e}")
 
     st.stop()
 
