@@ -26,7 +26,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# --- Custom Styling (Modern Enterprise Dashboard) ---
+# --- Custom Styling (Modern Enterprise Dashboard - Dark & Light Mode Adaptive) ---
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
@@ -40,9 +40,9 @@ st.markdown("""
         display: inline-flex;
         align-items: center;
         gap: 6px;
-        background: rgba(79, 70, 229, 0.08);
-        border: 1px solid rgba(79, 70, 229, 0.25);
-        color: #4f46e5;
+        background: rgba(99, 102, 241, 0.12);
+        border: 1px solid rgba(99, 102, 241, 0.35);
+        color: #6366f1;
         padding: 4px 12px;
         border-radius: 9999px;
         font-size: 0.82rem;
@@ -66,23 +66,23 @@ st.markdown("""
         margin: 16px 0;
     }
     .metric-box {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
+        background: var(--secondary-background-color, #f8fafc);
+        border: 1px solid rgba(128, 128, 128, 0.25);
         border-radius: 12px;
         padding: 14px 18px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
     }
     .metric-title {
         font-size: 0.75rem;
         text-transform: uppercase;
         font-weight: 700;
-        color: #64748b;
+        opacity: 0.75;
         letter-spacing: 0.05em;
     }
     .metric-num {
         font-size: 1.55rem;
         font-weight: 800;
-        color: #0f172a;
+        color: var(--text-color, inherit);
         margin-top: 4px;
     }
 
@@ -93,36 +93,36 @@ st.markdown("""
         align-items: center;
         gap: 6px;
         padding: 12px 16px;
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
+        background: var(--secondary-background-color, #f8fafc);
+        border: 1px solid rgba(128, 128, 128, 0.25);
         border-radius: 10px;
         margin: 14px 0;
     }
     .pipeline-pill {
-        background: #ffffff;
-        border: 1px solid #cbd5e1;
-        color: #1e293b;
+        background: var(--background-color, #ffffff);
+        border: 1px solid rgba(128, 128, 128, 0.3);
+        color: var(--text-color, inherit);
         padding: 4px 10px;
         border-radius: 6px;
         font-size: 0.8rem;
         font-weight: 600;
     }
     .pipeline-arrow {
-        color: #94a3b8;
+        color: rgba(128, 128, 128, 0.7);
         font-size: 0.8rem;
     }
 
     /* Audited Summary Banner */
     .summary-banner {
-        background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%);
-        border: 1px solid #a7f3d0;
+        background: rgba(16, 185, 129, 0.1);
+        border: 1px solid rgba(16, 185, 129, 0.35);
         border-left: 4px solid #10b981;
         border-radius: 10px;
         padding: 16px 20px;
         margin: 14px 0 20px 0;
     }
     .summary-heading {
-        color: #065f46;
+        color: #10b981;
         font-weight: 700;
         font-size: 0.95rem;
         margin-bottom: 4px;
@@ -131,22 +131,22 @@ st.markdown("""
         gap: 6px;
     }
     .summary-body {
-        color: #047857;
+        color: var(--text-color, inherit);
         font-size: 0.92rem;
-        line-height: 1.5;
+        line-height: 1.55;
     }
 
     /* Human in the loop review alert */
     .hitl-banner {
-        background: #fffbeb;
-        border: 1px solid #fde68a;
+        background: rgba(245, 158, 11, 0.12);
+        border: 1px solid rgba(245, 158, 11, 0.35);
         border-left: 4px solid #f59e0b;
         border-radius: 10px;
         padding: 16px 20px;
         margin: 16px 0;
     }
     .hitl-title {
-        color: #92400e;
+        color: #f59e0b;
         font-weight: 700;
         font-size: 0.95rem;
         margin-bottom: 4px;
@@ -155,25 +155,37 @@ st.markdown("""
         gap: 8px;
     }
     .hitl-desc {
-        color: #b45309;
+        color: var(--text-color, inherit);
+        opacity: 0.9;
         font-size: 0.88rem;
     }
 
     /* Chat bubble cards */
     .chat-card-user {
-        background: #f8fafc;
-        border: 1px solid #e2e8f0;
+        background: var(--secondary-background-color, #f8fafc);
+        border: 1px solid rgba(128, 128, 128, 0.25);
+        color: var(--text-color, inherit);
         border-radius: 10px;
         padding: 12px 16px;
         margin-bottom: 8px;
     }
     .chat-card-agent {
-        background: #ffffff;
-        border: 1px solid #e2e8f0;
+        background: var(--background-color, #ffffff);
+        border: 1px solid rgba(128, 128, 128, 0.25);
         border-left: 3px solid #6366f1;
+        color: var(--text-color, inherit);
         border-radius: 10px;
         padding: 12px 16px;
         margin-bottom: 12px;
+    }
+
+    /* Sidebar cards */
+    .sidebar-card {
+        background: var(--secondary-background-color, #f8fafc);
+        border: 1px solid rgba(128, 128, 128, 0.25);
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-bottom: 10px;
     }
 
     /* Streamlit overrides */
@@ -293,22 +305,22 @@ def render_query_results(data: dict, user_question: str):
             title = cfg.get("title", f"{y_col} by {x_col}")
 
             if chart_type == "bar":
-                fig = px.bar(df_results, x=x_col, y=y_col, title=title, template="plotly_white")
+                fig = px.bar(df_results, x=x_col, y=y_col, title=title)
             elif chart_type == "line":
-                fig = px.line(df_results, x=x_col, y=y_col, title=title, template="plotly_white")
+                fig = px.line(df_results, x=x_col, y=y_col, title=title)
             elif chart_type == "pie":
-                fig = px.pie(df_results, names=x_col, values=y_col, title=title, template="plotly_white")
+                fig = px.pie(df_results, names=x_col, values=y_col, title=title)
             elif chart_type == "scatter":
-                fig = px.scatter(df_results, x=x_col, y=y_col, title=title, template="plotly_white")
+                fig = px.scatter(df_results, x=x_col, y=y_col, title=title)
             else:
-                fig = px.bar(df_results, x=x_col, y=y_col, title=title, template="plotly_white")
+                fig = px.bar(df_results, x=x_col, y=y_col, title=title)
 
             fig.update_layout(
                 margin=dict(l=20, r=20, t=40, b=20),
                 paper_bgcolor="rgba(0,0,0,0)",
                 plot_bgcolor="rgba(0,0,0,0)"
             )
-            st.plotly_chart(fig, use_container_width=True)
+            st.plotly_chart(fig, use_container_width=True, theme="streamlit")
     else:
         st.warning("Query returned 0 rows.")
 
@@ -328,8 +340,8 @@ if not st.session_state["authenticated"]:
         st.markdown("""
         <div style="text-align: center; margin-bottom: 20px;">
             <div class="hero-chip">⚡ Multi-Agent SQL Engine v4.1</div>
-            <h1 style="font-weight: 800; font-size: 2.3rem; margin: 4px 0; color: #1e293b;">QueryPilot</h1>
-            <p style="color: #64748b; font-size: 0.95rem; margin-top: 0;">Natural Language SQL Intelligence with LangGraph & DuckDB</p>
+            <h1 style="font-weight: 800; font-size: 2.3rem; margin: 4px 0; color: var(--text-color, inherit);">QueryPilot</h1>
+            <p style="opacity: 0.75; font-size: 0.95rem; margin-top: 0;">Natural Language SQL Intelligence with LangGraph & DuckDB</p>
         </div>
         """, unsafe_allow_html=True)
 
@@ -426,8 +438,8 @@ if not st.session_state.get("chat_history"):
 st.markdown("""
 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
     <div>
-        <h2 style="font-weight: 800; margin: 0; color: #0f172a;">⚡ QueryPilot Dashboard</h2>
-        <p style="color: #64748b; font-size: 0.92rem; margin: 2px 0 0 0;">Multi-Agent Orchestration • LangGraph Memory • DuckDB SQL Execution</p>
+        <h2 style="font-weight: 800; margin: 0; color: var(--text-color, inherit);">⚡ QueryPilot Dashboard</h2>
+        <p style="opacity: 0.75; font-size: 0.92rem; margin: 2px 0 0 0;">Multi-Agent Orchestration • LangGraph Memory • DuckDB SQL Execution</p>
     </div>
 </div>
 """, unsafe_allow_html=True)
@@ -440,14 +452,14 @@ with st.sidebar:
 
     # Profile Card
     st.markdown(f"""
-    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 12px 14px; margin-bottom: 10px;">
+    <div class="sidebar-card">
         <div style="display: flex; align-items: center; gap: 10px;">
-            <div style="width: 36px; height: 36px; border-radius: 50%; background: #4f46e5; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: #6366f1; color: white; display: flex; align-items: center; justify-content: center; font-weight: 700;">
                 {initial}
             </div>
             <div>
-                <div style="font-weight: 700; color: #1e293b; font-size: 0.92rem;">{display_title}</div>
-                <div style="color: #64748b; font-size: 0.76rem;">@{user.get('username')}</div>
+                <div style="font-weight: 700; color: var(--text-color, inherit); font-size: 0.92rem;">{display_title}</div>
+                <div style="opacity: 0.75; font-size: 0.76rem;">@{user.get('username')}</div>
             </div>
         </div>
     </div>
@@ -500,9 +512,9 @@ with st.sidebar:
     if "dataset_info" in st.session_state:
         info = st.session_state["dataset_info"]
         st.markdown(f"""
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px; margin-top: 10px;">
-            <div style="font-size: 0.82rem; font-weight: 700; color: #15803d;"><span class="status-dot"></span> Active: <code>{info['table_name']}</code></div>
-            <div style="font-size: 0.76rem; color: #64748b; margin-top: 2px;">{info['row_count']} rows • {len(info['columns'])} columns</div>
+        <div class="sidebar-card" style="padding: 10px; margin-top: 10px;">
+            <div style="font-size: 0.82rem; font-weight: 700; color: #10b981;"><span class="status-dot"></span> Active: <code>{info['table_name']}</code></div>
+            <div style="font-size: 0.76rem; opacity: 0.75; margin-top: 2px;">{info['row_count']} rows • {len(info['columns'])} columns</div>
         </div>
         """, unsafe_allow_html=True)
 
@@ -534,14 +546,14 @@ if st.session_state.get("chat_history"):
             if msg.get("role") == "user":
                 st.markdown(f"""
                 <div class="chat-card-user">
-                    <span style="font-weight: 700; color: #1e293b;">👤 You:</span> {msg.get('content')}
+                    <span style="font-weight: 700; color: var(--text-color, inherit);">👤 You:</span> {msg.get('content')}
                 </div>
                 """, unsafe_allow_html=True)
             else:
-                sql_line = f'<div style="margin-top: 4px; font-size: 0.78rem; color: #64748b;">SQL: <code>{msg.get("sql")}</code></div>' if msg.get("sql") else ""
+                sql_line = f'<div style="margin-top: 4px; font-size: 0.78rem; opacity: 0.75;">SQL: <code>{msg.get("sql")}</code></div>' if msg.get("sql") else ""
                 st.markdown(f"""
                 <div class="chat-card-agent">
-                    <span style="font-weight: 700; color: #4338ca;">🤖 QueryPilot:</span> {msg.get('content')}
+                    <span style="font-weight: 700; color: #818cf8;">🤖 QueryPilot:</span> {msg.get('content')}
                     {sql_line}
                 </div>
                 """, unsafe_allow_html=True)
