@@ -6,14 +6,12 @@ class SQLSecurityError(Exception):
     pass
 
 
-FORBIDDEN_EXPRESSIONS = (
-    exp.Drop,
-    exp.Delete,
-    exp.Update,
-    exp.Insert,
-    exp.AlterTable,
-    exp.TruncateTable,
-    exp.Create,
+_forbidden_candidate_names = [
+    "Drop", "Delete", "Update", "Insert", 
+    "Alter", "AlterTable", "Truncate", "TruncateTable", "Create"
+]
+FORBIDDEN_EXPRESSIONS = tuple(
+    getattr(exp, name) for name in _forbidden_candidate_names if hasattr(exp, name)
 )
 
 
