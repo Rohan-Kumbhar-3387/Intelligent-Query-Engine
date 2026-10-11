@@ -45,9 +45,9 @@ flowchart TD
     HITL -->|Approved / Edited| Exec[DuckDB Execution Engine]
     HITL -->|Rejected| Cancel[Cancelled]
     
-    Val -->|Safe Query| Exec
-    Exec -->|Syntax Error (Max 3)| DE
-    Exec -->|Success| BI[BI Visualizer Agent]
+    Val -->|"Safe Query"| Exec
+    Exec -->|"Syntax Error (Retries)"| DE
+    Exec -->|"Success"| BI[BI Visualizer Agent]
     BI --> Critic[Critic & Fact-Checker Agent]
     Critic --> Memory[(Persistent Memory DB)]
     Critic --> UI([Streamlit Dashboard & Plotly Charts])
