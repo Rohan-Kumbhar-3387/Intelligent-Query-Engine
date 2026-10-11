@@ -84,6 +84,11 @@ def get_current_user(authorization: Optional[str] = Header(default=None)) -> dic
 
 # --- Health & Auth Endpoints ---
 
+@app.get("/")
+def root():
+    return {"status": "ok", "service": "QueryPilot Engine", "health": "/health", "docs": "/docs"}
+
+
 @app.get("/health")
 def health_check():
     return {"status": "ok", "service": "QueryPilot Engine"}
