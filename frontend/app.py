@@ -7,7 +7,16 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-BACKEND_URL = os.getenv("BACKEND_URL", "http://127.0.0.1:8000")
+BACKEND_URL = os.getenv("BACKEND_URL")
+if not BACKEND_URL:
+    try:
+        BACKEND_URL = st.secrets.get("BACKEND_URL")
+    except Exception:
+        pass
+if not BACKEND_URL:
+    BACKEND_URL = "http://127.0.0.1:8000"
+
+BACKEND_URL = str(BACKEND_URL).strip().rstrip("/")
 
 # Page configuration
 st.set_page_config(
@@ -350,7 +359,11 @@ if not st.session_state["authenticated"]:
                                 st.session_state["user"] = data["user"]
                                 st.rerun()
                             else:
-                                st.error(res.json().get("detail", "Invalid login credentials."))
+                                try:
+                                    err_msg = res.json().get("detail", "Invalid login credentials.")
+                                except Exception:
+                                    err_msg = f"Backend returned HTTP {res.status_code}: {res.text}"
+                                st.error(err_msg)
                         except Exception as e:
                             st.error(f"Cannot connect to backend: {e}")
 
@@ -390,7 +403,11 @@ if not st.session_state["authenticated"]:
                                 st.session_state["user"] = data["user"]
                                 st.rerun()
                             else:
-                                st.error(res.json().get("detail", "Registration failed."))
+                                try:
+                                    err_msg = res.json().get("detail", "Registration failed.")
+                                except Exception:
+                                    err_msg = f"Backend returned HTTP {res.status_code}: {res.text}"
+                                st.error(err_msg)
                         except Exception as e:
                             st.error(f"Cannot connect to backend: {e}")
 
