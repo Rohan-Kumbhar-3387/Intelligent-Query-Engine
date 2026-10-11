@@ -58,34 +58,6 @@ st.markdown("""
         display: inline-block;
     }
 
-    /* KPI Metrics Card */
-    .metric-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 14px;
-        margin: 16px 0;
-    }
-    .metric-box {
-        background: var(--secondary-background-color, #f8fafc);
-        border: 1px solid rgba(128, 128, 128, 0.25);
-        border-radius: 12px;
-        padding: 14px 18px;
-        box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-    }
-    .metric-title {
-        font-size: 0.75rem;
-        text-transform: uppercase;
-        font-weight: 700;
-        opacity: 0.75;
-        letter-spacing: 0.05em;
-    }
-    .metric-num {
-        font-size: 1.55rem;
-        font-weight: 800;
-        color: var(--text-color, inherit);
-        margin-top: 4px;
-    }
-
     /* Agent Pipeline Breadcrumb Trail */
     .pipeline-wrapper {
         display: flex;
@@ -93,15 +65,15 @@ st.markdown("""
         align-items: center;
         gap: 6px;
         padding: 12px 16px;
-        background: var(--secondary-background-color, #f8fafc);
-        border: 1px solid rgba(128, 128, 128, 0.25);
+        background: rgba(128, 128, 128, 0.08);
+        border: 1px solid rgba(128, 128, 128, 0.2);
         border-radius: 10px;
         margin: 14px 0;
     }
     .pipeline-pill {
-        background: var(--background-color, #ffffff);
-        border: 1px solid rgba(128, 128, 128, 0.3);
-        color: var(--text-color, inherit);
+        background: rgba(128, 128, 128, 0.16);
+        border: 1px solid rgba(128, 128, 128, 0.25);
+        color: inherit;
         padding: 4px 10px;
         border-radius: 6px;
         font-size: 0.8rem;
@@ -114,7 +86,7 @@ st.markdown("""
 
     /* Audited Summary Banner */
     .summary-banner {
-        background: rgba(16, 185, 129, 0.1);
+        background: rgba(16, 185, 129, 0.12);
         border: 1px solid rgba(16, 185, 129, 0.35);
         border-left: 4px solid #10b981;
         border-radius: 10px;
@@ -131,7 +103,7 @@ st.markdown("""
         gap: 6px;
     }
     .summary-body {
-        color: var(--text-color, inherit);
+        color: inherit;
         font-size: 0.92rem;
         line-height: 1.55;
     }
@@ -155,34 +127,15 @@ st.markdown("""
         gap: 8px;
     }
     .hitl-desc {
-        color: var(--text-color, inherit);
+        color: inherit;
         opacity: 0.9;
         font-size: 0.88rem;
     }
 
-    /* Chat bubble cards */
-    .chat-card-user {
-        background: var(--secondary-background-color, #f8fafc);
-        border: 1px solid rgba(128, 128, 128, 0.25);
-        color: var(--text-color, inherit);
-        border-radius: 10px;
-        padding: 12px 16px;
-        margin-bottom: 8px;
-    }
-    .chat-card-agent {
-        background: var(--background-color, #ffffff);
-        border: 1px solid rgba(128, 128, 128, 0.25);
-        border-left: 3px solid #6366f1;
-        color: var(--text-color, inherit);
-        border-radius: 10px;
-        padding: 12px 16px;
-        margin-bottom: 12px;
-    }
-
     /* Sidebar cards */
     .sidebar-card {
-        background: var(--secondary-background-color, #f8fafc);
-        border: 1px solid rgba(128, 128, 128, 0.25);
+        background: rgba(128, 128, 128, 0.1);
+        border: 1px solid rgba(128, 128, 128, 0.2);
         border-radius: 12px;
         padding: 12px 14px;
         margin-bottom: 10px;
@@ -258,27 +211,9 @@ def render_query_results(data: dict, user_question: str):
 
     # Performance Metric Cards
     c1, c2, c3 = st.columns(3)
-    with c1:
-        st.markdown(f"""
-        <div class="metric-box">
-            <div class="metric-title">⚡ Execution Latency</div>
-            <div class="metric-num">{data.get('latency_seconds', 0)}s</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with c2:
-        st.markdown(f"""
-        <div class="metric-box">
-            <div class="metric-title">📊 Rows Returned</div>
-            <div class="metric-num">{data.get('row_count', len(data.get('rows', [])))}</div>
-        </div>
-        """, unsafe_allow_html=True)
-    with c3:
-        st.markdown(f"""
-        <div class="metric-box">
-            <div class="metric-title">🔧 Healing Retries</div>
-            <div class="metric-num">{data.get('attempts_needed', 1)}</div>
-        </div>
-        """, unsafe_allow_html=True)
+    c1.metric("⚡ Latency", f"{data.get('latency_seconds', 0)}s")
+    c2.metric("📊 Rows Returned", data.get('row_count', len(data.get('rows', []))))
+    c3.metric("🔧 Healing Retries", data.get('attempts_needed', 1))
 
     # Audited Executive Summary
     st.markdown(f"""
@@ -544,19 +479,13 @@ if st.session_state.get("chat_history"):
     with st.expander(f"💬 Conversation History ({history_turns} previous turns)", expanded=False):
         for msg in st.session_state["chat_history"]:
             if msg.get("role") == "user":
-                st.markdown(f"""
-                <div class="chat-card-user">
-                    <span style="font-weight: 700; color: var(--text-color, inherit);">👤 You:</span> {msg.get('content')}
-                </div>
-                """, unsafe_allow_html=True)
+                with st.chat_message("user"):
+                    st.write(msg.get("content"))
             else:
-                sql_line = f'<div style="margin-top: 4px; font-size: 0.78rem; opacity: 0.75;">SQL: <code>{msg.get("sql")}</code></div>' if msg.get("sql") else ""
-                st.markdown(f"""
-                <div class="chat-card-agent">
-                    <span style="font-weight: 700; color: #818cf8;">🤖 QueryPilot:</span> {msg.get('content')}
-                    {sql_line}
-                </div>
-                """, unsafe_allow_html=True)
+                with st.chat_message("assistant"):
+                    st.write(msg.get("content"))
+                    if msg.get("sql"):
+                        st.code(msg.get("sql"), language="sql")
 
 # Query Box
 st.markdown("### 💬 Ask Query or Follow-Up")
